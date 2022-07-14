@@ -1,4 +1,4 @@
 # RRT_Algorithm _C++
-<img src="/result.png" width = "50%" height = "50%"></img>
+<img src="/result.png" width = "100%" height = "100%"></img>
 
-###https://robonote.tistory.com/58
+### https://robonote.tistory.com/58
