@@ -7,15 +7,15 @@
 #include <fstream>
 using namespace std;
 
-#define thrhold 1
+#define thrhold 3
 
 const int width = 300;
 const int height = 300;
 const double jump = 5;//(width/100.0 * height/100.0)/1.5;+
-const int start_x = 102;
-const int start_y = 102;
-const int des_x = 10;
-const int des_y = 22;
+const int start_x = 0;
+const int start_y = 0;
+const int des_x = 280;
+const int des_y = 263;
 
 struct Node{
     
@@ -64,22 +64,21 @@ Node* Sampling(int rwidth, int rheight){
     nNode -> x = nodeList[index]->x + jump*cosf(angle);
     nNode -> y = nodeList[index]->y + jump*sinf(angle);
     nNode -> parent = nodeList[index];
-
+    //cout <<"index:" << index << ", " << nodeList[index]->x << ", "<< nodeList[index]->x<< endl;
     return nNode;
 
 }
 
 bool collision(Node *sample)
 {
-    Node *parent;
-    if (sample->x >width || sample->x < 0)
+    Node *parent = sample->parent;
+    double tmpDist;
+    if (sample->x >width && sample->x < 0)
     {
-        free(sample);
         return false;
-    } 
-    else if(sample->y > height || sample->y < 0)
+    }
+    else if (sample->y >height && sample->y < 0)
     {
-        free(sample);
         return false;
     }
     else
@@ -87,14 +86,73 @@ bool collision(Node *sample)
         for(auto a : objectList)
         {
             bool collision = false;
-            double tmpDist = sqrt(pow((a.first-sample->x),2)+pow((a.second-sample->y),2));
-            if(tmpDist < 10)
-                return false;
+             //cout<< sample->x << ", " << parent->x << endl;
+             //cout<< sample->y << ", " << parent->y << endl;
+            if(sample->x > parent->x)
+            {
+            
+                for(int x1=parent->x; x1<(sample->x+1); x1++)
+                {
+                    if(sample->y > parent->y)
+                    {
+                        for(int y1=parent->y; y1<(sample->y+1); y1++)
+                        {
+                            //cout<< x1 << ", " << y1 << endl;
+                            tmpDist = sqrt(pow((a.first-x1),2)+pow((a.second-y1),2));
+                            if(tmpDist < 5)
+                                return false;
+                        }
+                    }
+                    else
+                    {
+                        for(int y1=parent->y; y1>(sample->y+1); y1--)
+                        {
+                            //cout<< x1 << ", " << y1 << endl;
+                            tmpDist = sqrt(pow((a.first-x1),2)+pow((a.second-y1),2));
+                            if(tmpDist < 5)
+                                return false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+            
+                for(int x1=parent->x; x1>(sample->x+1); x1--)
+                {
+                    if(sample->y > parent->y)
+                    {
+                        for(int y1=parent->y; y1<(sample->y+1); y1++)
+                        {
+                            //cout<< x1 << ", " << y1 << endl;
+                            tmpDist = sqrt(pow((a.first-x1),2)+pow((a.second-y1),2));
+                            if(tmpDist < 5)
+                                return false;
+                        }
+                    }
+                    else
+                    {
+                        for(int y1=parent->y; y1>(sample->y+1); y1--)
+                        {
+                            //cout<< x1 << ", " << y1 << endl;
+                            tmpDist = sqrt(pow((a.first-x1),2)+pow((a.second-y1),2));
+                            if(tmpDist < 5)
+                                return false;
+                        }
+                    }
+                }
+            }
+            
+        //cout << tmpDist << endl;
+
             
         }
+    
+        //cout <<"true" << endl;
+    }
         nodeList.push_back(sample);
         return true;
-    }
+    
     
 }
 void conNode(Node *nNode)
@@ -122,7 +180,7 @@ void conNode(Node *nNode)
                 //cout << "parent node.." << a->x << ", " << a->y << endl;
             }
     }
-    cout << "dist2: " << tmpdist << ","<< mindist << endl;
+    //cout << "dist2: " << tmpdist << ","<< mindist << endl;
     //cout << "push node.." << endl;
     //cout << "push node2.." << nNode->x << ", " << nNode->y << endl;
     
@@ -139,14 +197,17 @@ void InitNode()
 }
 int main()
 {
-    ofstream fsample;
-    ofstream ftree;
-    fsample.open("sampling.txt");
-    ftree.open("tree.txt");
+    ofstream fobject("object.txt");
+    ofstream fsample("sampling.txt");
+    ofstream ftree("tree.txt");
+    
+
+    
     std::random_device random_device;
     std::mt19937 engine(random_device());
     std::uniform_int_distribution<int> distribution(0.0, width);
     std::uniform_int_distribution<int> distribution2(0.0, height);
+
     double tmpdist;
     bool pathfound = false;
     Node *desNode = new Node;
@@ -163,8 +224,24 @@ int main()
     objectList.push_back(make_pair(20,20));
     objectList.push_back(make_pair(60,60));
     objectList.push_back(make_pair(78,82));
-    //objectList.push_back(make_pair(100,100));
     objectList.push_back(make_pair(90,60));
+    objectList.push_back(make_pair(110,130));
+    objectList.push_back(make_pair(150,150));
+    objectList.push_back(make_pair(200,180));
+    for(auto a : objectList)
+    {
+        int objWidth = a.first;
+        int objHeight = a.second;
+        std::uniform_int_distribution<int> distribution3(objWidth-5, objWidth+5);
+        std::uniform_int_distribution<int> distribution4(objHeight-5, objHeight+5);
+        for(int iter = 0 ; iter<10; iter++)
+        {
+            int objx=distribution3(engine);
+            int objy=distribution4(engine);
+            //cout << objx << ", "<< objy << endl;
+            objectList.push_back(make_pair(objx,objy));
+        }
+    }
     while(pathfound == false)
     {
         ptNode = nullptr;
@@ -175,12 +252,13 @@ int main()
             continue;
         //tmpNode = ptNode;
         conNode(ptNode);
-        cout << ptNode->x << ", "<< ptNode->y << endl;
-        fsample << ptNode->x << ", "<< ptNode->y << "\n";
+        
+        //cout << ptNode->x << ", "<< ptNode->y << endl;
+        fsample << ptNode->x << ","<< ptNode->y << "\n";
         tmpparent = ptNode->parent;
-        //cout <<"parentNode"<< tmpparent->x << ", "<< tmpparent->y << endl;
+
         tmpdist=sqrt(pow(desNode->x-ptNode->x,2)+pow(desNode->y-ptNode->y,2));
-        //cout << "tmpdist: " << tmpdist << endl;
+
         
         if(tmpdist < 3)
             pathfound=true;
@@ -189,20 +267,35 @@ int main()
     }
     fsample.close();
     cout << "found! " << nodeList.size() << endl;
-     cout << "count " << nodeList.size() << endl;
-    
+    //cout << "count " << nodeList.size() << endl;
+    //cout << "count " << objectList.size() << endl;
+
+    if(ftree.fail())
+    {
+        cout << "Error"<<endl;
+    }
     while(pathfound==true)
     {
         Node *tmpNode = ptNode->parent;
-        //cout <<ptNode->x<<", "<<ptNode->y<< endl;
-        ftree << ptNode->x << ", "<< ptNode->y << "\n";
+        ftree << ptNode->x << ","<< ptNode->y << "\n";
         tmpdist=sqrt(pow(nodeList[0]->x-ptNode->x,2)+pow(nodeList[0]->y-ptNode->y,2));
         if(tmpdist < 3)
+        {
             break;
+        }
         ptNode = tmpNode->parent;
         
     }
     ftree.close();
+
+    
+    for(auto a: objectList)
+    {
+        fobject << a.first << "," << a.second << "\n";
+    }
+    
+    fobject.close();
+    
     InitNode();
     free(ptNode);
     return 0;
