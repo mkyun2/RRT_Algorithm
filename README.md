@@ -1,6 +1,6 @@
 # RRT_Algorithm _C++
 
-##usage
+## usage
 <pre>
 <code> git clone git@github.com:mkyun2/RRT_Algorithm.git</code>
 <code> cd RRT_Algorithm</code>
@@ -9,6 +9,6 @@
 <code> make </code>
 <code> ./RRT_main </code>
 </pre>
-###dependence opencv4
-##Working Image
+### dependence opencv4
+## Working Image
 <img src="/picture/Test.png" width = "50%" height = "50%"></img>
