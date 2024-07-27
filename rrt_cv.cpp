@@ -1,10 +1,4 @@
 #include <iostream>
-#include <string>
-#include <random>
-#include <time.h>
-#include <vector>
-#include <algorithm>
-#include <fstream>
 #include "include/rrt_cv.hpp"
 using namespace std;
 
@@ -21,18 +15,12 @@ int main()
     while(true)
     {
         printf("Input startX startY \n");
-        scanf("%ld %ld",&startX,&startY);
+        scanf("%d %d",&startX,&startY);
         printf("Input goalX goalY \n");
-        scanf("%ld %ld",&goalX,&goalY);
+        scanf("%d %d",&goalX,&goalY);
         Planner.configure(startX,startY,goalX,goalY);
-        printf("configure");
         Planner.createPlan();
-        printf("createPlan");
     }
-    //map = cv::Mat::zeros(sizeX_,sizeY_,CV_8UC1);
-    //RRT::configure();
-    //RRT::createPlan();
-    //printf("dd");
     return 0;
 }
 double RRT::randSample(int size)
@@ -338,9 +326,10 @@ void RRT::configure(unsigned int startX, unsigned int startY, unsigned int goalX
     sampleDistThr = 0.1;
     nodeSize = 0;
     goalTolerance = 10;
-    prev_time_ = 0.0;
-    collisionThr = 0;
+    collisionThr = 1;
     map = cv::Mat::zeros(sizeY_,sizeX_,CV_8UC1);
+    printf("Set Map Size(%d, %d)\n",sizeX_,sizeY_);
+    printf("Set start point(%d, %d) and goal point(%d, %d)\n",startX_,startY_,goalX_,goalY_);
 }
 void RRT::adjustGoal(double & goalThr)
 {
@@ -385,19 +374,23 @@ void RRT::createPlan()
         else if(nodeList.size()>sizeX_*sizeY_ && !validPathFlag)
             adjustGoal(goalTolerance);
     }
+    vector<std::pair<int,int>> foundPlan;
     while(validPathFlag == true)
-        {
-            map.at<uchar>(ptNode->y,ptNode->x) = 255;
-            printf("(%d,%d) \n",ptNode->x,ptNode->y);
-            if(ptNode->parent == nullptr)
-                break;
-            Vertex* tmpNode = ptNode->parent;            
-            //tempDist = sqrt(pow(nodeList[0]->x - ptNode->x, 2) + pow(nodeList[0]->y - ptNode->y, 2));
-            //printf("(%d,%d)",ptNode->x,ptNode->y);
-            ptNode = tmpNode;
-        }
+    {
+        foundPlan.push_back({ptNode->y,ptNode->x});
+        map.at<uchar>(ptNode->y,ptNode->x) = 254;
+        //printf("(%d,%d) \n",ptNode->x,ptNode->y);
+        if(ptNode->parent == nullptr)
+            break;
+        Vertex* tmpNode = ptNode->parent;            
+        //tempDist = sqrt(pow(nodeList[0]->x - ptNode->x, 2) + pow(nodeList[0]->y - ptNode->y, 2));
+        //printf("(%d,%d)",ptNode->x,ptNode->y);
+        ptNode = tmpNode;
+    }
+    
+    printf("Found Plan. Plan Size %ld \n",foundPlan.size());
     cv::imshow("Map",map);
-    std::cout << "press 'q' Key to exit" << std::endl;
+    std::cout << "press 'q' Key on cv Window" << std::endl;
     int key = cv::waitKey();
     if(key == 'q')
     {
@@ -405,33 +398,5 @@ void RRT::createPlan()
         cv::destroyAllWindows();
     }
     InitVertex();
-    double pathCostThr = 10000;
-    
-    // Find a path which has minimum length of sampled Paths
-    // for ( auto path : samplePaths)
-    // {
-
-    //     if(!path.poses.size())
-    //         break;
-    //     double preReplanWaysampleX = path.poses[0].pose.position.x;
-    //     double preReplanWaysampleY = path.poses[0].pose.position.y;
-    //     double replanPathLength = 0;
-
-    //     for (auto point : path.poses)
-    //     {
-            
-    //     replanPathLength += std::sqrt(std::pow(point.pose.position.x - preReplanWaysampleX,2)+std::pow(point.pose.position.y - preReplanWaysampleY,2));
-    //     preReplanWaysampleX = point.pose.position.x;
-    //     preReplanWaysampleY = point.pose.position.y;
-    //     }
-    //     if( replanPathLength < pathCostThr)
-    //     {
-    //     pathCostThr = replanPathLength;
-    //     samplePath = path;
-    //     }
-    // }
-    // samplePaths.clear();
-    // tempPath = samplePath;
-    //cout << "Check..2"<< endl;
 
 }

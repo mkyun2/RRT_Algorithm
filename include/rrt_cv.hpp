@@ -1,9 +1,9 @@
 #include <random>
 #include <iostream>
 #include <vector>
+#include <string>
+#include <algorithm>
 #include <opencv4/opencv2/opencv.hpp>
-#include <opencv4/opencv2/core/mat.hpp>
-#include <opencv4/opencv2/core.hpp>
 class RRT
 {
     public:
@@ -17,7 +17,6 @@ class RRT
         
         cv::Mat map;
         std::random_device random_device;
-        double prev_time_;
         unsigned int sizeX_;
         unsigned int sizeY_;
         unsigned int startX_;
